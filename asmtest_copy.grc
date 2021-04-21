@@ -1,0 +1,145 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: lolz2
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: lolz
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: packet_len
+  id: variable
+  parameters:
+    comment: ''
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: /home/kiruna/test_data
+    type: byte
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [923, 278]
+    rotation: 0
+    state: true
+- name: blocks_repack_bits_bb_0
+  id: blocks_repack_bits_bb
+  parameters:
+    affinity: ''
+    alias: ''
+    align_output: 'False'
+    comment: ''
+    endianness: gr.GR_LSB_FIRST
+    k: '8'
+    l: '1'
+    len_tag_key: '""'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [657, 288]
+    rotation: 0
+    state: true
+- name: blocks_vector_source_x_0
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'False'
+    tags: '[]'
+    type: byte
+    vector: (0,0,1,1,1,1,0,0,0,1,0,1,1,1,0,0)
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [489, 147]
+    rotation: 0
+    state: true
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\n\n#!/usr/bin/env python3\n\
+      # -*- coding: utf-8 -*-\n\nimport numpy as np\nimport math\nfrom gnuradio import\
+      \ gr, blocks\n\n\nclass asm_framer(gr.basic_block):\n    #runs only once when\
+      \ the instance of the block is crated\n    def __init__(self, golay=False):\n\
+      \        gr.basic_block.__init__(self, name='asm_framer',\n        in_sig=[(np.int8)],\n\
+      \        out_sig=[(np.int8)])\n        self._golay=golay\n        self._asm_header\
+      \ = [(0xC9D08A7B >> bit) & 1 for bit in range(32 - 1, -1, -1)]\n\n    def general_work(self,\
+      \ input_items, output_items):\n        in0 = input_items[0]\n        data_length=math.ceil(len(in0)/8)\n\
+      \        length_field = [(data_length >> bit) & 1 for bit in range(12 - 1, -1,\
+      \ -1)]\n\n        output_array=np.int8(np.append(np.append(np.array(self._asm_header),np.array(length_field)),in0))\n\
+      \        output_items[0]=output_array\n        self.consume(0, len(in0))\n \
+      \       return len(output_array)\n\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    golay: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('asm_framer', 'asm_framer', [('golay', 'False')], [('0', 'byte', 1)],
+      [('0', 'byte', 1)], '', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [803, 156]
+    rotation: 0
+    state: true
+
+connections:
+- [blocks_repack_bits_bb_0, '0', epy_block_0, '0']
+- [blocks_vector_source_x_0, '0', blocks_repack_bits_bb_0, '0']
+- [epy_block_0, '0', blocks_file_sink_0, '0']
+
+metadata:
+  file_format: 1
